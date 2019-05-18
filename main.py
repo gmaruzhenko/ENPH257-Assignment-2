@@ -2,12 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math as math
 
+# Constants
 RODLENGTH = .3     # meters
-RADIUS = .02         # meters
+RADIUS = .01         # meters
 HIGHTEMP = 50 + 273.15   # Kelvin
 ROOMTEMP = 20 + 273.15   # Kelvin
 
-# Constants
 HEAT_CAPACITY = 921.096   # c  J/kg K
 DENSITY = 2830          # p kg/m^3
 CONDUCTIVITY = 205.0  # k W/(m K)
@@ -24,24 +24,27 @@ SLICE_SIZE = RODLENGTH / SLICES
 END_OF_BAR_SURFACE_AREA = math.pi * RADIUS ** 2
 CYLINDER_SURFACE_AREA = 2 * math.pi * RADIUS * SLICE_SIZE
 
-DENOMINATOR = (HEAT_CAPACITY * DENSITY * math.pi * RADIUS * SLICE_SIZE)
+DENOMINATOR = HEAT_CAPACITY * DENSITY * math.pi * RADIUS**2 * SLICE_SIZE
+
+# Helper functions
 
 
-def convection_power_loss(slice_temp, index):
+def temp_change_convection(slice_temp, index):
     if index == SLICES-1:
-        return (CYLINDER_SURFACE_AREA + END_OF_BAR_SURFACE_AREA) * CONVECTION * (slice_temp - ROOMTEMP)
+        return -CONVECTION * (slice_temp - ROOMTEMP) / (HEAT_CAPACITY * DENSITY)
     else:
-        return CYLINDER_SURFACE_AREA * CONVECTION * (slice_temp - ROOMTEMP)
+        return -2 * CONVECTION * (slice_temp - ROOMTEMP) / (HEAT_CAPACITY * DENSITY * RADIUS)
 
 
-def radiative_power_loss(slice_temp, index):
+def temp_change_radiative(slice_temp, index):
     if index == SLICES-1:
-        return (CYLINDER_SURFACE_AREA + END_OF_BAR_SURFACE_AREA) * EMISSIVITY * BOLTZ * (slice_temp ** 4 - ROOMTEMP ** 4)
+        power_loss = (CYLINDER_SURFACE_AREA + END_OF_BAR_SURFACE_AREA) * EMISSIVITY * BOLTZ * (slice_temp ** 4 - ROOMTEMP ** 4)
     else:
-        return CYLINDER_SURFACE_AREA * EMISSIVITY * BOLTZ * (currentTemp ** 4 - ROOMTEMP ** 4)
+        power_loss = CYLINDER_SURFACE_AREA * EMISSIVITY * BOLTZ * (currentTemp ** 4 - ROOMTEMP ** 4)
+    return -power_loss / DENOMINATOR
 
 
-def double_conduction_differential(array, index):
+def double_differential_conduction(array, index):
     if index == 0:
         doublediff = (-array[index] + array[index + 1]) / (SLICE_SIZE ** 2)
     elif index == SLICES - 1:
@@ -65,19 +68,16 @@ x_axis_for_plot = [i * SLICE_SIZE for i in range(0, SLICES)]
 
 
 time = 0
-while time < 16000:
+while time < 16000*10:
     slice_index = 0
     previous_itteration = rodTempArray
     while slice_index < SLICES:
         currentTemp = rodTempArray[slice_index]
-        totalTempChangePowerLoss = (convection_power_loss(currentTemp, slice_index) + radiative_power_loss(
-            currentTemp, slice_index)) * TIME_STEP / DENOMINATOR
-        temperatureChangeConduction = CONDUCTIVITY * TIME_STEP * double_conduction_differential(rodTempArray,
+        temperatureChangeConduction = CONDUCTIVITY * TIME_STEP * double_differential_conduction(rodTempArray,
                                                                                                 slice_index) / (
                                                   HEAT_CAPACITY * DENSITY)
-
         # apply change to current segment of array
-        dt = temperatureChangeConduction + temp_change_power_in(slice_index) - totalTempChangePowerLoss
+        dt = temperatureChangeConduction + temp_change_power_in(slice_index) + temp_change_convection(currentTemp, slice_index) + temp_change_radiative(currentTemp, slice_index)
         rodTempArray[slice_index] += dt
 
         slice_index += 1
