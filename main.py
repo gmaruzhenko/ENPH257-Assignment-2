@@ -24,7 +24,7 @@ SLICE_SIZE = RODLENGTH / SLICES
 END_OF_BAR_SURFACE_AREA = math.pi * RADIUS ** 2
 CYLINDER_SURFACE_AREA = 2 * math.pi * RADIUS * SLICE_SIZE
 
-driver()
+DENOMINATOR = (HEAT_CAPACITY * DENSITY * math.pi * RADIUS * SLICE_SIZE)
 
 
 def convection_power_loss(slice_temp, index):
@@ -53,43 +53,42 @@ def double_conduction_differential(array, index):
 
 def temp_change_power_in(index):
     if index == 0:
-        temp_change = POWERIN * TIME_STEP / denominator
+        temp_change = POWERIN * TIME_STEP / DENOMINATOR
     else:
         temp_change = 0
     return temp_change
 
-def driver():
-    # set up arrays
-    rodTempArray = np.ones(SLICES) * ROOMTEMP
-    x_axis_for_plot = [i * SLICE_SIZE for i in range(0, SLICES)]
 
-    denominator = (HEAT_CAPACITY * DENSITY * math.pi * RADIUS * SLICE_SIZE)
+# set up arrays
+rodTempArray = np.ones(SLICES) * ROOMTEMP
+x_axis_for_plot = [i * SLICE_SIZE for i in range(0, SLICES)]
 
-    time = 0
-    while time < 16000:
-        slice_index = 0
-        previous_itteration = rodTempArray
-        while slice_index < SLICES:
-            currentTemp = rodTempArray[slice_index]
-            totalTempChangePowerLoss = (convection_power_loss(currentTemp, slice_index) + radiative_power_loss(
-                currentTemp, slice_index)) * TIME_STEP / denominator
-            temperatureChangeConduction = CONDUCTIVITY * TIME_STEP * double_conduction_differential(rodTempArray,
-                                                                                                    slice_index) / (
-                                                      HEAT_CAPACITY * DENSITY)
 
-            # apply change to current segment of array
-            dt = temperatureChangeConduction + temp_change_power_in(slice_index) - totalTempChangePowerLoss
-            rodTempArray[slice_index] += dt
+time = 0
+while time < 16000:
+    slice_index = 0
+    previous_itteration = rodTempArray
+    while slice_index < SLICES:
+        currentTemp = rodTempArray[slice_index]
+        totalTempChangePowerLoss = (convection_power_loss(currentTemp, slice_index) + radiative_power_loss(
+            currentTemp, slice_index)) * TIME_STEP / DENOMINATOR
+        temperatureChangeConduction = CONDUCTIVITY * TIME_STEP * double_conduction_differential(rodTempArray,
+                                                                                                slice_index) / (
+                                                  HEAT_CAPACITY * DENSITY)
 
-            slice_index += 1
+        # apply change to current segment of array
+        dt = temperatureChangeConduction + temp_change_power_in(slice_index) - totalTempChangePowerLoss
+        rodTempArray[slice_index] += dt
 
-        if abs(sum(rodTempArray) / SLICES + sum(previous_itteration) / SLICES < 0.001):
-            print("steady state reached")
-            print(time)
-        time += TIME_STEP
+        slice_index += 1
 
-    plt.plot(x_axis_for_plot, rodTempArray)
-    plt.show()
+    if abs(sum(rodTempArray) / SLICES + sum(previous_itteration) / SLICES < 0.001):
+        print("steady state reached")
+        print(time)
+    time += TIME_STEP
+
+plt.plot(x_axis_for_plot, rodTempArray)
+plt.show()
 
 
 
