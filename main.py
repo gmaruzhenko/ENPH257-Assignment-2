@@ -12,10 +12,10 @@ HEAT_CAPACITY = 921.096   # c  J/kg K
 DENSITY = 2830          # p kg/m^3
 CONDUCTIVITY = 205.0  # k W/(m K)
 
-POWERIN = 100        # W
+POWERIN = 10        # W
 EMISSIVITY = 1
 BOLTZ = 5.67*10**(-8)   # W/m^2/k^4
-CONVECTION = 5      # kc W/m^2/K
+CONVECTION = 11      # kc W/m^2/K
 
 TIME_STEP = .05     # in seconds
 SLICES = 40
@@ -47,9 +47,9 @@ def radiative_power_loss(slice_temp, index):
 
 def double_conduction_differential(array, index):
     if index == 0:
-        doublediff = (-array[index] + array[index + 1]) / SLICE_SIZE
+        doublediff = (-array[index] + array[index + 1]) / (SLICE_SIZE ** 2)
     elif index == SLICES - 1:
-        doublediff = (-array[index] + array[index - 1]) / SLICE_SIZE
+        doublediff = (-array[index] + array[index - 1]) / (SLICE_SIZE ** 2)
     else:
         doublediff = (array[index - 1] - 2 * array[index] + array[index + 1]) / (SLICE_SIZE ** 2)
     return doublediff
@@ -64,8 +64,9 @@ def temp_change_power_in(index):
 
 
 time = 0
-while time < 100:
+while time < 16000:
     slice_index = 0
+    previous_itteration= rodTempArray
     while slice_index < SLICES:
 
         currentTemp = rodTempArray[slice_index]
@@ -73,9 +74,14 @@ while time < 100:
         temperatureChangeConduction = CONDUCTIVITY * TIME_STEP * double_conduction_differential(rodTempArray, slice_index) / (HEAT_CAPACITY * DENSITY)
 
         # apply change to current segment of array
-        rodTempArray[slice_index] += temperatureChangeConduction + temp_change_power_in(slice_index) - totalTempChangePowerLoss
+        dt = temperatureChangeConduction + temp_change_power_in(slice_index) - totalTempChangePowerLoss
+        rodTempArray[slice_index] += dt
+
         slice_index += 1
 
+    if abs(sum(rodTempArray)/SLICES + sum(previous_itteration)/SLICES < 0.001):
+        print("steady state reached")
+        print(time)
     time += TIME_STEP
 
 plt.plot(x_axis_for_plot, rodTempArray)
