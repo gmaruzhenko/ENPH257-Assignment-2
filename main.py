@@ -7,6 +7,7 @@ RODLENGTH = .3     # meters
 RADIUS = .01         # meters
 HIGHTEMP = 50 + 273.15   # Kelvin
 ROOMTEMP = 20 + 273.15   # Kelvin
+TIME_LIMIT = 600
 
 HEAT_CAPACITY = 921.096   # c  J/kg K
 DENSITY = 2830          # p kg/m^3
@@ -68,7 +69,7 @@ x_axis_for_plot = [i * SLICE_SIZE for i in range(0, SLICES)]
 
 
 time = 0
-while time < 100000:
+while time < TIME_LIMIT:
     slice_index = 0
     previous_itteration = rodTempArray
     while slice_index < SLICES:
@@ -82,10 +83,10 @@ while time < 100000:
 
         slice_index += 1
 
-    if abs(sum(rodTempArray) - sum(previous_itteration)) < 0.000001:
-        print(sum(rodTempArray))
-        print("steady state reached")
-        print(time)
+    # if abs(sum(rodTempArray) - sum(previous_itteration)) < 0.0001:
+    #     print(float(sum(rodTempArray)) - float(sum(previous_itteration)))
+    #     print("steady state reached")
+    #     print(time)
     time += TIME_STEP
 
 plt.plot(x_axis_for_plot, rodTempArray)
