@@ -44,16 +44,17 @@ pressure_1_2 = [i * DELTA_P for i in range(p1, p2)]
 data_size = len(pressure_1_2)
 volume_1_2 = np.ones(data_size)
 
+def initilize_adiabat(volme_array, pressure_array, v_initial):
+    volme_array[0] = v_initial
+    count = 1
+    while count < data_size:
+        volme_array[count] = volme_array[count-1] * (pressure_array[count-1]/pressure_array[count])**(1/GAMMA)
+        count += 1
+    return
 
-# initilize volume array
-volume_1_2[0] = v1
-count = 1
-while count < data_size:
-    volume_1_2[count] = volume_1_2[count-1] * (pressure_1_2[count-1]/pressure_1_2[count])**(1/GAMMA)
-    count += 1
 
-v_ratio_2 = [(i) ** (-GAMMA) + A * h for i in pressure_1_2]
-
+# initialize volume array for stage 1 - 2
+initilize_adiabat(volume_1_2, pressure_1_2, v1)
 
 plt.plot(volume_1_2, pressure_1_2)
 plt.show()
