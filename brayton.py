@@ -97,11 +97,18 @@ initilize_adiabat_volume(volume_3_4, pressure_3_4, v4)
 volume_4_1 = np.linspace(v4, v1)
 pressure_4_1 = np.ones(len(volume_4_1)) * p1
 
-# plot and show
+# plot and show Brayton Cycle P-V
 #plot_chart()
 
 
-# Thermal efficiency vs Pressure ratio
-efficiency_comparison()
+# Thermal efficiency vs Pressure ratio comparison
+#efficiency_comparison()
+
+
+# plot efficiency vs pressure ratio
+pressure_ratio_array = np.linspace(1, P_RATIO_MAX)
+
+
+
 
 
