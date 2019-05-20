@@ -1,6 +1,8 @@
-import numpy as np
+from __future__ import print_function
 import matplotlib.pyplot as plt
-import math as math
+import numpy as np
+from scipy.integrate import simps
+from numpy import trapz
 
 
 # Constants
@@ -84,5 +86,18 @@ volume_4_1 = np.linspace(v4, v1)
 pressure_4_1 = np.ones(len(volume_4_1)) * p1
 
 # plot and show
-plot_chart()
+#plot_chart()
+
+
+# Thermal efficiency vs Pressure ratio
+
+area = - abs(trapz(pressure_1_2, volume_1_2)) + abs(trapz(pressure_2_3, volume_2_3)) \
+       + abs(trapz(pressure_3_4, volume_3_4)) - abs(trapz(pressure_4_1, volume_4_1))
+
+heat_in = N * 7/2 * R * (t3 - t2)
+theoretical_efficiency = 1 - t1/t2
+
+print("actual efficiency =", area/heat_in )
+print("theoretical efficiency =", theoretical_efficiency)
+
 
