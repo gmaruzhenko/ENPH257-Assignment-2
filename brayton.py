@@ -40,23 +40,28 @@ p4 = p1
 v4 = v3 * (p3/p4)**(1/GAMMA)
 t4 = t3 * (v3/v4)**(GAMMA-1)
 
-pressure_1_2 = [i * DELTA_P for i in range(p1, p2)]
+pressure_1_2 = [i * DELTA_P for i in range(p1, p2 + DELTA_P)]
 data_size = len(pressure_1_2)
 volume_1_2 = np.ones(data_size)
 
-def initilize_adiabat(volme_array, pressure_array, v_initial):
-    volme_array[0] = v_initial
+
+def initilize_adiabat_volume(volume_array, pressure_array, v_initial):
+    volume_array[0] = v_initial
     count = 1
     while count < data_size:
-        volme_array[count] = volme_array[count-1] * (pressure_array[count-1]/pressure_array[count])**(1/GAMMA)
+        volume_array[count] = volume_array[count - 1] * (pressure_array[count - 1] / pressure_array[count]) ** (1 / GAMMA)
         count += 1
     return
 
 
 # initialize volume array for stage 1 - 2
-initilize_adiabat(volume_1_2, pressure_1_2, v1)
+initilize_adiabat_volume(volume_1_2, pressure_1_2, v1)
+
+volume_2_3 = np.linspace(v2, v3)
+pressure_2_3 = np.ones(len(volume_2_3)) * p2
 
 plt.plot(volume_1_2, pressure_1_2)
+plt.plot(volume_2_3, pressure_2_3, 'red')
 plt.show()
 
 
