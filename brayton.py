@@ -4,12 +4,9 @@ import numpy as np
 from scipy.integrate import simps
 from numpy import trapz
 
-# Constants
+# Global Constants
 GAMMA = 1.4
 R = 0.08205746   # L atm / K mol
-A = 1   # m^2
-h = 1   #m
-DELTA_P = 0.1
 
 # Initial Conditions
 T0 = 273.15 + 10        # KELVIN
@@ -40,9 +37,7 @@ def get_thermal_efficiency(p_maximum_ratio, type):
     def get_numerical_efficiency():
         area = - abs(trapz(pressure_1_2, volume_1_2)) + abs(trapz(pressure_2_3, volume_2_3)) \
                + abs(trapz(pressure_3_4, volume_3_4)) - abs(trapz(pressure_4_1, volume_4_1))
-
         heat_in = N * 7 / 2 * R * (t3 - t2)
-
         return area / heat_in
 
     def plot_chart():
@@ -59,7 +54,7 @@ def get_thermal_efficiency(p_maximum_ratio, type):
         plt.show()
         return
 
-    # Constraints
+    # Constraints for System
     T_max = 273.15 + 1000   # KELVIN
 
     # Stage 1 (given)
@@ -100,34 +95,40 @@ def get_thermal_efficiency(p_maximum_ratio, type):
     volume_4_1 = np.linspace(v4, v1)
     pressure_4_1 = np.ones(len(volume_4_1)) * p1
 
-
-
-    # plot and show Brayton Cycle P-V
+    # uncomment to plot and show Brayton Cycle P-V
     #plot_chart()
 
-    # Thermal efficiency vs Pressure ratio comparison
+    # uncomment to show Thermal efficiency vs Pressure ratio comparison
     #efficiency_comparison()
 
+    # return requested type of efficiency
     if type == 'theoretical':
         return get_theoretical_efficiency()
     else:
         return get_numerical_efficiency()
 
 
+def plot_thermal_efficiency_vs_pressure_ratio():
+    # set max value we want to plot up to
+    MAX_PRESSURE_RATIO = 20
+
+    pressure_ratio_array = [i for i in range(1, MAX_PRESSURE_RATIO + 1)]
+    thermal_eff_array = [get_thermal_efficiency(i, 'theoretical') * 100 for i in pressure_ratio_array]
+    numeric_eff_array = [get_thermal_efficiency(i, 'numerical') * 100 for i in pressure_ratio_array]
+
+    plt.plot(thermal_eff_array, pressure_ratio_array)
+    plt.plot(numeric_eff_array, pressure_ratio_array, 'ro')
+    plt.title('Pressure Ratio VS Thermal Efficiency')
+    plt.xlabel('Thermal Efficiency (%)')
+    plt.ylabel('Pressure Ratio')
+    plt.legend(['theoretical', 'numerical'])
+
+    plt.show()
+
+
 # plot efficiency vs pressure ratio
-MAX_PRESSURE_RATIO = 40
+plot_thermal_efficiency_vs_pressure_ratio()
 
-pressure_ratio_array = [i for i in range(1, MAX_PRESSURE_RATIO + 1)]
-thermal_eff_array = [get_thermal_efficiency(i, 'theoretical') * 100 for i in pressure_ratio_array]
-numeric_eff_array = [get_thermal_efficiency(i, 'numerical') * 100 for i in pressure_ratio_array]
-plt.plot(thermal_eff_array, pressure_ratio_array)
-plt.plot(numeric_eff_array, pressure_ratio_array, 'ro')
-
-
-plt.title('Pressure Ratio VS Thermal Efficiency')
-plt.xlabel('Thermal Efficiency (%)')
-plt.ylabel('Pressure Ratio')
-plt.show()
 
 
 
