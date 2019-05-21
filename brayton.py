@@ -18,7 +18,7 @@ V0 = 1   # L
 N = P0 * V0 / (R * T0)
 
 
-def get_thermal_efficiency(p_maximum_ratio):
+def get_thermal_efficiency(p_maximum_ratio, type):
     # helpers
     def initilize_adiabat_volume(volume_array, pressure_array, v_minimum):
         volume_array[0] = v_minimum
@@ -30,18 +30,20 @@ def get_thermal_efficiency(p_maximum_ratio):
         return
 
     def efficiency_comparison():
-        area = - abs(trapz(pressure_1_2, volume_1_2)) + abs(trapz(pressure_2_3, volume_2_3)) \
-               + abs(trapz(pressure_3_4, volume_3_4)) - abs(trapz(pressure_4_1, volume_4_1))
-
-        heat_in = N * 7 / 2 * R * (t3 - t2)
-        theoretical_efficiency = 1 - t1 / t2
-
-        print("actual efficiency =", area / heat_in)
-        print("theoretical efficiency =", theoretical_efficiency)
+        print("actual efficiency =", get_numerical_efficiency())
+        print("theoretical efficiency =", get_theoretical_efficiency())
         return
 
     def get_theoretical_efficiency():
         return 1 - t1 / t2
+
+    def get_numerical_efficiency():
+        area = - abs(trapz(pressure_1_2, volume_1_2)) + abs(trapz(pressure_2_3, volume_2_3)) \
+               + abs(trapz(pressure_3_4, volume_3_4)) - abs(trapz(pressure_4_1, volume_4_1))
+
+        heat_in = N * 7 / 2 * R * (t3 - t2)
+
+        return area / heat_in
 
     def plot_chart():
         plt.plot(volume_1_2, pressure_1_2, 'blue')
@@ -106,14 +108,22 @@ def get_thermal_efficiency(p_maximum_ratio):
     # Thermal efficiency vs Pressure ratio comparison
     #efficiency_comparison()
 
-    return get_theoretical_efficiency()
+    if type == 'theoretical':
+        return get_theoretical_efficiency()
+    else:
+        return get_numerical_efficiency()
 
 
 # plot efficiency vs pressure ratio
-pressure_ratio_array = [i for i in range(1, 20 + 1)]
-thermal_eff_array = [get_thermal_efficiency(i) * 100 for i in pressure_ratio_array]
-print(thermal_eff_array)
+MAX_PRESSURE_RATIO = 40
+
+pressure_ratio_array = [i for i in range(1, MAX_PRESSURE_RATIO + 1)]
+thermal_eff_array = [get_thermal_efficiency(i, 'theoretical') * 100 for i in pressure_ratio_array]
+numeric_eff_array = [get_thermal_efficiency(i, 'numerical') * 100 for i in pressure_ratio_array]
 plt.plot(thermal_eff_array, pressure_ratio_array)
+plt.plot(numeric_eff_array, pressure_ratio_array, 'ro')
+
+
 plt.title('Pressure Ratio VS Thermal Efficiency')
 plt.xlabel('Thermal Efficiency (%)')
 plt.ylabel('Pressure Ratio')
