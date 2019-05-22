@@ -1,3 +1,6 @@
+#   Created by Georgiy Maruzhenko on 2019-03-16.
+#   Copyright © 2019 Georgiy Maruzhenko. All rights reserved.
+
 from __future__ import print_function
 import matplotlib.pyplot as plt
 import numpy as np
@@ -128,10 +131,5 @@ def plot_thermal_efficiency_vs_pressure_ratio():
 
 # plot efficiency vs pressure ratio
 plot_thermal_efficiency_vs_pressure_ratio()
-
-
-
-
-
 
 
