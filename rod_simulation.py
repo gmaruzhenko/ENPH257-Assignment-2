@@ -10,16 +10,16 @@ RODLENGTH = .3     # meters
 RADIUS = .01         # meters
 HIGHTEMP = 50 + 273.15   # Kelvin
 ROOMTEMP = 20 + 273.15   # Kelvin
-TIME_LIMIT = 600
+TIME_LIMIT = 10000.0
 
 HEAT_CAPACITY = 921.096   # c  J/kg K
-DENSITY = 2830          # p kg/m^3
+DENSITY = 2830.0          # p kg/m^3
 CONDUCTIVITY = 205.0  # k W/(m K)
 
-POWERIN = 10        # W
-EMISSIVITY = 1
+POWERIN = 10.0        # W
+EMISSIVITY = 1.0
 BOLTZ = 5.67*10**(-8)   # W/m^2/k^4
-CONVECTION = 5      # kc W/m^2/K
+CONVECTION = 5.0      # kc W/m^2/K
 
 TIME_STEP = .05     # in seconds
 SLICES = 40
@@ -40,12 +40,24 @@ def temp_change_convection(slice_temp, index):
         return -2 * CONVECTION * (slice_temp - ROOMTEMP) / (HEAT_CAPACITY * DENSITY * RADIUS)
 
 
-def temp_change_radiative(slice_temp, index):
+def power_loss_convection(slice_temp, index):
+    if index == SLICES-1:
+        power_loss_c = -CONVECTION * (CYLINDER_SURFACE_AREA + END_OF_BAR_SURFACE_AREA) * (slice_temp - ROOMTEMP)
+    else:
+        power_loss_c = -CONVECTION * CYLINDER_SURFACE_AREA * (slice_temp - ROOMTEMP)
+    return power_loss_c
+
+
+def power_loss_radiative(slice_temp, index):
     if index == SLICES-1:
         power_loss = (CYLINDER_SURFACE_AREA + END_OF_BAR_SURFACE_AREA) * EMISSIVITY * BOLTZ * (slice_temp ** 4 - ROOMTEMP ** 4)
     else:
         power_loss = CYLINDER_SURFACE_AREA * EMISSIVITY * BOLTZ * (currentTemp ** 4 - ROOMTEMP ** 4)
-    return -power_loss / DENOMINATOR
+    return -power_loss
+
+
+def temp_change_radiative(slice_temp, index):
+    return power_loss_radiative(slice_temp, index) / DENOMINATOR
 
 
 def double_differential_conduction(array, index):
@@ -69,6 +81,10 @@ def temp_change_power_in(index):
 # set up arrays
 rodTempArray = np.ones(SLICES) * ROOMTEMP
 x_axis_for_plot = [i * SLICE_SIZE for i in range(0, SLICES)]
+heatingArray = np.ones(SLICES)
+radiationArray = np.ones(SLICES)
+convectionArray = np.ones(SLICES)
+sumPowerArray = np.ones(SLICES)
 
 
 time = 0
