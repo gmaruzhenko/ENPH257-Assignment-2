@@ -43,7 +43,7 @@ def temp_change_convection(slice_temp, index):
 
 
 def power_loss_convection(slice_temp, index):
-    if index == SLICES-1:
+    if index == SLICES-1 or index == 0:
         power_loss_c = -CONVECTION * (CYLINDER_SURFACE_AREA + END_OF_BAR_SURFACE_AREA) * (slice_temp - ROOMTEMP)
     else:
         power_loss_c = -CONVECTION * CYLINDER_SURFACE_AREA * (slice_temp - ROOMTEMP)
@@ -52,7 +52,7 @@ def power_loss_convection(slice_temp, index):
 
 
 def power_loss_radiative(slice_temp, index):
-    if index == SLICES-1:
+    if index == SLICES-1 or index == 0:
         power_loss = (CYLINDER_SURFACE_AREA + END_OF_BAR_SURFACE_AREA) * EMISSIVITY * BOLTZ * (slice_temp ** 4 - ROOMTEMP ** 4)
     else:
         power_loss = CYLINDER_SURFACE_AREA * EMISSIVITY * BOLTZ * (currentTemp ** 4 - ROOMTEMP ** 4)
@@ -126,7 +126,6 @@ heatingArray_total = np.ones(int(TIME_LIMIT/TIME_STEP))
 time = 0
 while time < TIME_LIMIT:
     slice_index = 0
-    previous_itteration = rodTempArray
     while slice_index < SLICES:
         currentTemp = rodTempArray[slice_index]
         temperatureChangeConduction = CONDUCTIVITY * TIME_STEP * double_differential_conduction(rodTempArray,
@@ -143,7 +142,7 @@ while time < TIME_LIMIT:
     update_power_budget_arrays(time)
     time += TIME_STEP
 
-plot_temp_sim()
+# plot_temp_sim()
 
 plot_power_budget()
 
